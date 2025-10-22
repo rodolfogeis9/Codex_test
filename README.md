@@ -1,30 +1,53 @@
-# CLI: Estimador de ahorro hacia hitos de edad
+# Simulador de jubilación
 
-Pequeño script en Node.js puro (sin dependencias externas) que solicita la fecha de nacimiento y un aporte mensual en CLP, y estima el valor futuro al cumplir 50, 55, 60 y 65 años asumiendo 10% anual compuesto mensualmente.
+Aplicación que permite simular el ahorro para la jubilación ingresando:
 
-Archivos:
-- `index.js` : script principal (CLI)
-- `package.json` : incluye script `start`
+- Nombre y fecha de nacimiento.
+- Edad objetivo y año deseado de jubilación.
+- Rentabilidad promedio anual esperada.
+- Tres escenarios de aportes mensuales en dólares.
 
-Cómo ejecutar:
+Incluye:
 
-1. Asegúrate de tener Node.js instalado (versión moderna, por ejemplo 14+).
-2. En la carpeta del proyecto ejecuta:
+- **Front-end en React + Vite** (`npm start` / `npm run dev`).
+- **CLI en Node.js** (`npm run cli`) para generar la misma simulación desde la terminal.
+
+## Requisitos
+
+- Node.js 18 o superior.
+
+## Instalación
+
+```bash
+npm install
+```
+
+## Ejecutar el front-end
 
 ```bash
 npm start
 ```
 
-Uso:
-- Ingresa la fecha de nacimiento en formato `YYYY-MM-DD` (ej: `1980-05-21`).
-- Ingresa el monto de ahorro mensual en CLP (ej: `50000`). Puedes usar puntos como separador de miles (ej: `50.000`) o coma decimal.
+Esto inicia el servidor de desarrollo de Vite (puedes usar también `npm run dev`). Abre el navegador en [http://localhost:5173](http://localhost:5173) y completa el formulario para ver los resultados.
 
-Salida:
-Imprime una tabla con columnas: Edad objetivo, Meses restantes y Valor futuro estimado en CLP.
+## Ejecutar el CLI
 
-Notas:
-- Las funciones principales están implementadas como funciones puras en `index.js`: `parseFecha`, `mesesHastaEdad`, `fvAnualidadMensual`, `leerLinea`.
-- La tasa mensual se calcula como (1 + 0.10)^(1/12) - 1.
-- Redondeo: meses a enteros y CLP a 0 decimales.
+```bash
+npm run cli
+```
+
+El asistente pedirá la información paso a paso y mostrará una tabla con el capital estimado, total aportado e interés generado para cada escenario.
+
+## Scripts adicionales
+
+- `npm run build`: genera la versión optimizada del front-end en la carpeta `dist/`.
+- `npm run preview`: sirve la compilación de producción localmente.
+
+## Estructura relevante
+
+- `src/utils/finance.js`: funciones puras para cálculo de edades, meses y valor futuro.
+- `src/cli/index.js`: implementa la experiencia de consola.
+- `src/App.jsx`: interfaz en React para capturar datos y presentar resultados.
+
 # Codex_test
 Test with codex
