@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   parseISODate,
   addYears,
@@ -6,6 +6,7 @@ import {
   simulateRetirementPlan,
   calculateAgeInYears,
 } from './utils/finance.js';
+import ScenarioChart from './components/ScenarioChart.jsx';
 
 const defaultForm = {
   name: '',
@@ -13,6 +14,7 @@ const defaultForm = {
   retirementAge: '',
   retirementYear: '',
   averageReturn: '6',
+  currentSavings: '0',
   contributions: ['300', '500', '800'],
 };
 
@@ -36,6 +38,11 @@ export default function App() {
   const [form, setForm] = useState(() => ({ ...defaultForm }));
   const [errors, setErrors] = useState([]);
   const [result, setResult] = useState(null);
+  const [activeScenario, setActiveScenario] = useState(0);
+
+  useEffect(() => {
+    setActiveScenario(0);
+  }, [result]);
 
   const handleFieldChange = (field) => (event) => {
     const { value } = event.target;
@@ -92,6 +99,7 @@ export default function App() {
     setForm({ ...defaultForm });
     setErrors([]);
     setResult(null);
+    setActiveScenario(0);
   };
 
   const handleSubmit = (event) => {
@@ -132,6 +140,14 @@ export default function App() {
       validationErrors.push('La rentabilidad promedio debe ser un número mayor o igual a 0.');
     }
 
+    const currentSavingsNumber =
+      form.currentSavings.trim() === ''
+        ? 0
+        : parseMoneyInput(form.currentSavings);
+    if (!Number.isFinite(currentSavingsNumber) || currentSavingsNumber < 0) {
+      validationErrors.push('El ahorro actual debe ser un número mayor o igual a 0.');
+    }
+
     const contributions = form.contributions.map((value, index) => {
       const parsed = parseMoneyInput(value);
       if (!Number.isFinite(parsed) || parsed <= 0) {
@@ -167,6 +183,7 @@ export default function App() {
         retirementYear: retirementYearNumber,
         annualReturnRate: averageReturnNumber / 100,
         monthlyContributions: contributions,
+        initialSavings: currentSavingsNumber,
       });
       setResult({ name: trimmedName, plan });
       setErrors([]);
@@ -180,6 +197,7 @@ export default function App() {
     if (!result) return [];
     const { plan } = result;
     const retirementDate = plan.targetDate.toISOString().slice(0, 10);
+    const projectionDate = plan.projectionEndDate.toISOString().slice(0, 10);
     return [
       {
         label: 'Fecha estimada de jubilación',
@@ -197,8 +215,18 @@ export default function App() {
         label: 'Edad objetivo',
         value: `${plan.retirementAge} años`,
       },
+      {
+        label: 'Proyección extendida',
+        value: `Hasta los ${plan.projectionEndAge} años (${projectionDate})`,
+      },
+      {
+        label: 'Ahorro actual',
+        value: currencyFormatter.format(plan.initialSavings),
+      },
     ];
   }, [result]);
+
+  const activeScenarioData = result?.plan.scenarios[activeScenario] ?? null;
 
   return (
     <div className="app">
@@ -262,6 +290,16 @@ export default function App() {
                   value={form.averageReturn}
                   onChange={handleFieldChange('averageReturn')}
                   placeholder="Ej: 6.5"
+                />
+              </label>
+              <label className="field">
+                <span>Ahorro actual (USD)</span>
+                <input
+                  type="number"
+                  min="0"
+                  value={form.currentSavings}
+                  onChange={handleFieldChange('currentSavings')}
+                  placeholder="Ej: 15000"
                 />
               </label>
             </div>
@@ -329,6 +367,91 @@ export default function App() {
                   </div>
                 ))}
               </div>
+              {activeScenarioData && (
+                <div className="scenario-tabs">
+                  <div className="scenario-tabs__nav" role="tablist">
+                    {result.plan.scenarios.map((scenario, index) => {
+                      const isActive = index === activeScenario;
+                      return (
+                        <button
+                          key={scenario.id}
+                          type="button"
+                          role="tab"
+                          aria-selected={isActive}
+                          className={`scenario-tabs__button${isActive ? ' is-active' : ''}`}
+                          onClick={() => setActiveScenario(index)}
+                        >
+                          {`Escenario ${index + 1}`}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="scenario-tabs__panel" role="tabpanel">
+                    <div className="scenario-detail">
+                      <div className="scenario-detail__metrics">
+                        <div className="metric-card">
+                          <span className="metric-card__label">Ahorro actual</span>
+                          <strong className="metric-card__value">
+                            {currencyFormatter.format(result.plan.initialSavings)}
+                          </strong>
+                        </div>
+                        <div className="metric-card">
+                          <span className="metric-card__label">Aporte mensual</span>
+                          <strong className="metric-card__value">
+                            {currencyFormatter.format(activeScenarioData.monthlyContribution)}
+                          </strong>
+                        </div>
+                        <div className="metric-card">
+                          <span className="metric-card__label">
+                            {`Total aportado hasta los ${result.plan.retirementAge} años`}
+                          </span>
+                          <strong className="metric-card__value">
+                            {currencyFormatter.format(activeScenarioData.totalContributed)}
+                          </strong>
+                        </div>
+                        <div className="metric-card">
+                          <span className="metric-card__label">
+                            {`Capital a los ${result.plan.retirementAge} años`}
+                          </span>
+                          <strong className="metric-card__value">
+                            {currencyFormatter.format(activeScenarioData.valueAtRetirement)}
+                          </strong>
+                        </div>
+                        <div className="metric-card">
+                          <span className="metric-card__label">
+                            {`Capital proyectado a los ${result.plan.projectionEndAge} años`}
+                          </span>
+                          <strong className="metric-card__value">
+                            {currencyFormatter.format(activeScenarioData.extendedFutureValue)}
+                          </strong>
+                        </div>
+                        <div className="metric-card">
+                          <span className="metric-card__label">
+                            {`Interés generado a los ${result.plan.retirementAge} años`}
+                          </span>
+                          <strong className="metric-card__value">
+                            {currencyFormatter.format(activeScenarioData.interestEarned)}
+                          </strong>
+                        </div>
+                        <div className="metric-card">
+                          <span className="metric-card__label">
+                            {`Interés proyectado a los ${result.plan.projectionEndAge} años`}
+                          </span>
+                          <strong className="metric-card__value">
+                            {currencyFormatter.format(activeScenarioData.extendedInterestEarned)}
+                          </strong>
+                        </div>
+                      </div>
+                      <ScenarioChart
+                        timeline={activeScenarioData.timeline}
+                        retirementAge={result.plan.retirementAge}
+                        projectionEndAge={result.plan.projectionEndAge}
+                        formatCurrency={(value) => currencyFormatter.format(value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
               <div className="table-wrapper">
                 <table>
                   <thead>
@@ -336,8 +459,9 @@ export default function App() {
                       <th>Escenario</th>
                       <th>Ahorro mensual</th>
                       <th>Total aportado</th>
-                      <th>Capital estimado</th>
-                      <th>Interés generado</th>
+                      <th>{`Capital a los ${result.plan.retirementAge} años`}</th>
+                      <th>{`Interés a los ${result.plan.retirementAge} años`}</th>
+                      <th>{`Capital a los ${result.plan.projectionEndAge} años`}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -348,6 +472,7 @@ export default function App() {
                         <td>{currencyFormatter.format(scenario.totalContributed)}</td>
                         <td>{currencyFormatter.format(scenario.futureValue)}</td>
                         <td>{currencyFormatter.format(scenario.interestEarned)}</td>
+                        <td>{currencyFormatter.format(scenario.extendedFutureValue)}</td>
                       </tr>
                     ))}
                   </tbody>

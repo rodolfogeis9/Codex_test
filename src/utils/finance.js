@@ -117,6 +117,7 @@ export function simulateRetirementPlan({
   retirementYear,
   annualReturnRate,
   monthlyContributions,
+  initialSavings = 0,
   today = new Date(),
 }) {
   if (!(birthDate instanceof Date) || Number.isNaN(birthDate.getTime())) {
@@ -137,6 +138,9 @@ export function simulateRetirementPlan({
   if (!Array.isArray(monthlyContributions) || monthlyContributions.length === 0) {
     throw new TypeError('Debe proporcionar al menos un escenario de ahorro mensual.');
   }
+  if (typeof initialSavings !== 'number' || Number.isNaN(initialSavings) || initialSavings < 0) {
+    throw new RangeError('El ahorro actual debe ser un número mayor o igual a 0.');
+  }
   const contributions = monthlyContributions.map((value, index) => {
     if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
       throw new RangeError(`El escenario ${index + 1} debe ser un número mayor a 0.`);
@@ -150,6 +154,10 @@ export function simulateRetirementPlan({
     throw new RangeError('La fecha de jubilación debe ser futura.');
   }
 
+  const projectionEndAge = Math.max(retirementAge, 65);
+  const projectionEndDate = addYears(birthDate, projectionEndAge);
+  const monthsToProjectionEnd = monthsBetweenDates(today, projectionEndDate);
+
   const expectedRetirementYear = targetDate.getUTCFullYear();
   let yearMismatch = null;
   if (retirementYear != null && retirementYear !== expectedRetirementYear) {
@@ -160,19 +168,70 @@ export function simulateRetirementPlan({
   }
 
   const monthlyRate = annualRateToMonthlyRate(annualReturnRate);
+  const baseDate = new Date(
+    Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())
+  );
   const scenarios = contributions.map((monthlyContribution, index) => {
-    const futureValue = futureValueOfAnnuity(
+    const totalContributed = monthlyContribution * monthsToRetirement;
+    const initialSavingsAtRetirement =
+      initialSavings * Math.pow(1 + monthlyRate, monthsToRetirement);
+    const futureValueAnnuity = futureValueOfAnnuity(
       monthlyContribution,
       monthlyRate,
       monthsToRetirement
     );
-    const totalContributed = monthlyContribution * monthsToRetirement;
+    const theoreticalFutureValue = initialSavingsAtRetirement + futureValueAnnuity;
+
+    let balance = initialSavings;
+    let contributed = 0;
+    let valueAtRetirement = theoreticalFutureValue;
+    const timeline = [];
+
+    const recordPoint = (monthIndex, date, { isRetirement = false } = {}) => {
+      timeline.push({
+        monthIndex,
+        date,
+        balance,
+        contributed,
+        age: calculateAgeInYears(date, birthDate),
+        isRetirement,
+      });
+    };
+
+    recordPoint(0, new Date(baseDate));
+
+    for (let month = 0; month < monthsToProjectionEnd; month += 1) {
+      balance *= 1 + monthlyRate;
+      if (month < monthsToRetirement) {
+        balance += monthlyContribution;
+        contributed += monthlyContribution;
+      }
+      const nextDate = new Date(baseDate);
+      nextDate.setUTCMonth(baseDate.getUTCMonth() + month + 1);
+      const monthIndex = month + 1;
+      const isRetirement = monthIndex === monthsToRetirement;
+      if (isRetirement) {
+        valueAtRetirement = balance;
+      }
+      if (isRetirement || monthIndex % 12 === 0 || monthIndex === monthsToProjectionEnd) {
+        recordPoint(monthIndex, nextDate, { isRetirement });
+      }
+    }
+
+    const futureValue = valueAtRetirement;
+    const extendedFutureValue = timeline.length
+      ? timeline[timeline.length - 1].balance
+      : balance;
     return {
       id: index,
       monthlyContribution,
       futureValue,
       totalContributed,
-      interestEarned: futureValue - totalContributed,
+      interestEarned: futureValue - totalContributed - initialSavings,
+      extendedFutureValue,
+      extendedInterestEarned: extendedFutureValue - totalContributed - initialSavings,
+      timeline,
+      valueAtRetirement,
     };
   });
 
@@ -191,5 +250,9 @@ export function simulateRetirementPlan({
     yearMismatch,
     currentAge,
     retirementAge,
+    projectionEndAge,
+    projectionEndDate,
+    monthsToProjectionEnd,
+    initialSavings,
   };
 }
