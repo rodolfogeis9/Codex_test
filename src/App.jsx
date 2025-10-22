@@ -197,7 +197,6 @@ export default function App() {
     if (!result) return [];
     const { plan } = result;
     const retirementDate = plan.targetDate.toISOString().slice(0, 10);
-    const projectionDate = plan.projectionEndDate.toISOString().slice(0, 10);
     return [
       {
         label: 'Fecha estimada de jubilación',
@@ -214,10 +213,6 @@ export default function App() {
       {
         label: 'Edad objetivo',
         value: `${plan.retirementAge} años`,
-      },
-      {
-        label: 'Proyección extendida',
-        value: `Hasta los ${plan.projectionEndAge} años (${projectionDate})`,
       },
       {
         label: 'Ahorro actual',
@@ -388,66 +383,39 @@ export default function App() {
                   </div>
                   <div className="scenario-tabs__panel" role="tabpanel">
                     <div className="scenario-detail">
-                      <div className="scenario-detail__metrics">
-                        <div className="metric-card">
-                          <span className="metric-card__label">Ahorro actual</span>
-                          <strong className="metric-card__value">
-                            {currencyFormatter.format(result.plan.initialSavings)}
-                          </strong>
-                        </div>
-                        <div className="metric-card">
-                          <span className="metric-card__label">Aporte mensual</span>
-                          <strong className="metric-card__value">
-                            {currencyFormatter.format(activeScenarioData.monthlyContribution)}
-                          </strong>
-                        </div>
-                        <div className="metric-card">
-                          <span className="metric-card__label">
-                            {`Total aportado hasta los ${result.plan.retirementAge} años`}
-                          </span>
-                          <strong className="metric-card__value">
-                            {currencyFormatter.format(activeScenarioData.totalContributed)}
-                          </strong>
-                        </div>
-                        <div className="metric-card">
-                          <span className="metric-card__label">
-                            {`Capital a los ${result.plan.retirementAge} años`}
-                          </span>
-                          <strong className="metric-card__value">
-                            {currencyFormatter.format(activeScenarioData.valueAtRetirement)}
-                          </strong>
-                        </div>
-                        <div className="metric-card">
-                          <span className="metric-card__label">
-                            {`Capital proyectado a los ${result.plan.projectionEndAge} años`}
-                          </span>
-                          <strong className="metric-card__value">
-                            {currencyFormatter.format(activeScenarioData.extendedFutureValue)}
-                          </strong>
-                        </div>
-                        <div className="metric-card">
-                          <span className="metric-card__label">
-                            {`Interés generado a los ${result.plan.retirementAge} años`}
-                          </span>
-                          <strong className="metric-card__value">
-                            {currencyFormatter.format(activeScenarioData.interestEarned)}
-                          </strong>
-                        </div>
-                        <div className="metric-card">
-                          <span className="metric-card__label">
-                            {`Interés proyectado a los ${result.plan.projectionEndAge} años`}
-                          </span>
-                          <strong className="metric-card__value">
-                            {currencyFormatter.format(activeScenarioData.extendedInterestEarned)}
-                          </strong>
-                        </div>
+                      <div className="scenario-detail__chart">
+                        <ScenarioChart
+                          timeline={activeScenarioData.timeline}
+                          retirementAge={result.plan.retirementAge}
+                          formatCurrency={(value) => currencyFormatter.format(value)}
+                          initialBalance={result.plan.initialSavings}
+                        />
                       </div>
-                      <ScenarioChart
-                        timeline={activeScenarioData.timeline}
-                        retirementAge={result.plan.retirementAge}
-                        projectionEndAge={result.plan.projectionEndAge}
-                        formatCurrency={(value) => currencyFormatter.format(value)}
-                      />
+                      <div className="scenario-detail__metrics">
+                        {[
+                          {
+                            label: 'Aporte mensual',
+                            value: currencyFormatter.format(activeScenarioData.monthlyContribution),
+                          },
+                          {
+                            label: `Total aportado hasta los ${result.plan.retirementAge} años`,
+                            value: currencyFormatter.format(activeScenarioData.totalContributed),
+                          },
+                          {
+                            label: `Capital a los ${result.plan.retirementAge} años`,
+                            value: currencyFormatter.format(activeScenarioData.valueAtRetirement),
+                          },
+                          {
+                            label: `Interés generado a los ${result.plan.retirementAge} años`,
+                            value: currencyFormatter.format(activeScenarioData.interestEarned),
+                          },
+                        ].map((item) => (
+                          <div key={item.label} className="metric-card">
+                            <span className="metric-card__label">{item.label}</span>
+                            <strong className="metric-card__value">{item.value}</strong>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -461,7 +429,6 @@ export default function App() {
                       <th>Total aportado</th>
                       <th>{`Capital a los ${result.plan.retirementAge} años`}</th>
                       <th>{`Interés a los ${result.plan.retirementAge} años`}</th>
-                      <th>{`Capital a los ${result.plan.projectionEndAge} años`}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -472,7 +439,6 @@ export default function App() {
                         <td>{currencyFormatter.format(scenario.totalContributed)}</td>
                         <td>{currencyFormatter.format(scenario.futureValue)}</td>
                         <td>{currencyFormatter.format(scenario.interestEarned)}</td>
-                        <td>{currencyFormatter.format(scenario.extendedFutureValue)}</td>
                       </tr>
                     ))}
                   </tbody>

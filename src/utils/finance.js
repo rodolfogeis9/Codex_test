@@ -154,7 +154,7 @@ export function simulateRetirementPlan({
     throw new RangeError('La fecha de jubilación debe ser futura.');
   }
 
-  const projectionEndAge = Math.max(retirementAge, 65);
+  const projectionEndAge = retirementAge;
   const projectionEndDate = addYears(birthDate, projectionEndAge);
   const monthsToProjectionEnd = monthsBetweenDates(today, projectionEndDate);
 
@@ -219,17 +219,12 @@ export function simulateRetirementPlan({
     }
 
     const futureValue = valueAtRetirement;
-    const extendedFutureValue = timeline.length
-      ? timeline[timeline.length - 1].balance
-      : balance;
     return {
       id: index,
       monthlyContribution,
       futureValue,
       totalContributed,
       interestEarned: futureValue - totalContributed - initialSavings,
-      extendedFutureValue,
-      extendedInterestEarned: extendedFutureValue - totalContributed - initialSavings,
       timeline,
       valueAtRetirement,
     };
