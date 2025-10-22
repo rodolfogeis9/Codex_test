@@ -1,0 +1,21 @@
+{
+  "name": "codex-test-ahorros",
+  "version": "1.0.0",
+  "description": "CLI simple para estimar valor futuro de ahorros mensuales hacia hitos de edad (sin dependencias).",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rodolfogeis9/Codex_test.git"
+  },
+  "keywords": [],
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/rodolfogeis9/Codex_test/issues"
+  },
+  "homepage": "https://github.com/rodolfogeis9/Codex_test#readme"
+}
