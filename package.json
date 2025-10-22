@@ -1,10 +1,15 @@
 {
   "name": "codex-test-ahorros",
-  "version": "1.0.0",
-  "description": "CLI simple para estimar valor futuro de ahorros mensuales hacia hitos de edad (sin dependencias).",
-  "main": "index.js",
+  "version": "1.1.0",
+  "description": "Simulador de jubilación con CLI y front-end en React.",
+  "type": "module",
+  "main": "src/cli/index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "cli": "node src/cli/index.js"
   },
   "author": "",
   "license": "MIT",
@@ -13,9 +18,16 @@
     "url": "git+https://github.com/rodolfogeis9/Codex_test.git"
   },
   "keywords": [],
-  "type": "commonjs",
   "bugs": {
     "url": "https://github.com/rodolfogeis9/Codex_test/issues"
   },
-  "homepage": "https://github.com/rodolfogeis9/Codex_test#readme"
+  "homepage": "https://github.com/rodolfogeis9/Codex_test#readme",
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.0.0",
+    "vite": "^5.0.0"
+  }
 }
