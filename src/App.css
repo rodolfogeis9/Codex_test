@@ -292,48 +292,59 @@ body {
 }
 
 .scenario-detail {
-  display: grid;
-  grid-template-columns: minmax(240px, 320px) 1fr;
-  gap: 1.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.85rem;
+}
+
+.scenario-detail__chart {
+  width: 100%;
 }
 
 .scenario-detail__metrics {
   display: grid;
-  gap: 0.9rem;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
 .metric-card {
-  background: linear-gradient(160deg, rgba(13, 35, 48, 0.92), rgba(8, 24, 35, 0.88));
-  border-radius: 14px;
-  padding: 0.95rem 1.1rem;
-  border: 1px solid rgba(127, 225, 189, 0.16);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.25), rgba(125, 211, 252, 0.18));
+  border-radius: 16px;
+  padding: 1rem 1.15rem;
+  border: 1px solid rgba(96, 165, 250, 0.35);
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.45rem;
+  color: #e0f2ff;
 }
 
 .metric-card__label {
   font-size: 0.8rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #82a8bb;
+  letter-spacing: 0.06em;
+  color: #9ac9ff;
 }
 
 .metric-card__value {
-  font-size: 1.05rem;
+  font-size: 1.08rem;
   font-weight: 600;
-  color: #f1fbff;
+  color: #ffffff;
 }
 
 .scenario-chart {
-  background: rgba(6, 14, 20, 0.65);
-  border-radius: 18px;
-  padding: 1.15rem 1.35rem;
-  border: 1px solid rgba(47, 216, 164, 0.14);
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 1.6rem 1.75rem;
+  box-shadow: 0 32px 65px rgba(15, 23, 42, 0.28);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  justify-content: center;
+  gap: 1.25rem;
+  color: #0f172a;
+}
+
+.scenario-chart__canvas {
+  position: relative;
+  width: 100%;
 }
 
 .scenario-chart__svg {
@@ -342,64 +353,212 @@ body {
 }
 
 .scenario-chart__backdrop {
-  fill: rgba(8, 24, 35, 0.8);
+  fill: #ffffff;
+  stroke: #dbeafe;
+  stroke-width: 2;
 }
 
 .scenario-chart__axis {
-  stroke: rgba(220, 240, 248, 0.12);
-  stroke-width: 0.4;
+  stroke: #1e3a8a;
+  stroke-width: 2;
+  stroke-linecap: round;
 }
 
-.scenario-chart__area {
-  stroke: none;
+.scenario-chart__grid-line {
+  stroke: rgba(96, 165, 250, 0.25);
+  stroke-width: 1;
+}
+
+.scenario-chart__grid-line--vertical {
+  stroke-dasharray: 6 10;
+}
+
+.scenario-chart__tick-label {
+  fill: #1e293b;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.scenario-chart__axis-label {
+  fill: #0f172a;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
 }
 
 .scenario-chart__line {
   fill: none;
-  stroke: #2fd8a4;
-  stroke-width: 1.2;
-  stroke-linejoin: round;
   stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.scenario-chart__line--total {
+  stroke: #1d4ed8;
+  stroke-width: 3.6;
+}
+
+.scenario-chart__line--invested {
+  stroke: #60a5fa;
+  stroke-width: 3;
+  stroke-dasharray: 10 6;
 }
 
 .scenario-chart__retirement {
-  stroke: rgba(240, 190, 72, 0.65);
-  stroke-width: 0.9;
-  stroke-dasharray: 2.5;
+  stroke: rgba(37, 99, 235, 0.6);
+  stroke-width: 2;
+  stroke-dasharray: 8 6;
+}
+
+.scenario-chart__cursor {
+  stroke: rgba(15, 23, 42, 0.35);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 6;
 }
 
 .scenario-chart__dot {
-  fill: #2fd8a4;
+  stroke: #ffffff;
+  stroke-width: 2;
 }
 
-.scenario-chart__dot--highlight {
-  fill: #f0be48;
+.scenario-chart__dot--total {
+  fill: #1d4ed8;
+}
+
+.scenario-chart__dot--invested {
+  fill: #60a5fa;
+}
+
+.scenario-chart__tooltip {
+  position: absolute;
+  transform: translate(-50%, -120%);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.95), rgba(59, 130, 246, 0.9));
+  color: #ffffff;
+  padding: 0.85rem 1.1rem;
+  border-radius: 14px;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.28);
+  min-width: 200px;
+  pointer-events: none;
+}
+
+.scenario-chart__tooltip-heading {
+  margin: 0 0 0.25rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.scenario-chart__tooltip-subheading {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  color: rgba(226, 232, 240, 0.8);
+}
+
+.scenario-chart__tooltip-subheading--age {
+  margin-top: -0.35rem;
+  color: rgba(226, 232, 240, 0.85);
+}
+
+.scenario-chart__tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.9rem;
+  margin-bottom: 0.4rem;
+}
+
+.scenario-chart__tooltip-row--total {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.scenario-chart__controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.85rem 1.25rem;
+  font-size: 0.95rem;
+  color: #0f172a;
+}
+
+.scenario-chart__controls-label {
+  font-weight: 600;
+}
+
+.scenario-chart__controls input[type='range'] {
+  width: min(320px, 100%);
+  accent-color: #1d4ed8;
+}
+
+.scenario-chart__controls-value {
+  font-size: 0.9rem;
+  color: #1e3a8a;
+}
+
+.scenario-chart__reset {
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #60a5fa, #1d4ed8);
+  color: #ffffff;
+  padding: 0.45rem 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 12px 22px rgba(59, 130, 246, 0.25);
+}
+
+.scenario-chart__reset:hover {
+  filter: brightness(1.05);
 }
 
 .scenario-chart__legend {
   display: flex;
-  gap: 1.5rem;
   flex-wrap: wrap;
-  color: #c7e7f5;
-  font-size: 0.92rem;
+  gap: 1rem;
+  color: #0f172a;
+  font-size: 0.95rem;
 }
 
 .scenario-chart__legend-item {
   display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  min-width: 140px;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(191, 219, 254, 0.32);
+  padding: 0.75rem 1.05rem;
+  border-radius: 14px;
 }
 
-.scenario-chart__legend-item span {
-  color: #82a8bb;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-size: 0.75rem;
+.scenario-chart__legend-item div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
 }
 
 .scenario-chart__legend-item strong {
   font-size: 1.05rem;
+}
+
+.scenario-chart__legend-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+}
+
+.scenario-chart__legend-swatch--total {
+  background: #1d4ed8;
+}
+
+.scenario-chart__legend-swatch--invested {
+  background: #60a5fa;
+}
+
+.scenario-chart__legend-item--goal {
+  background: rgba(37, 99, 235, 0.12);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.scenario-chart__legend-year {
+  font-weight: 600;
 }
 
 .table-wrapper {
@@ -446,7 +605,7 @@ tbody tr:last-child td {
   }
 
   .scenario-detail {
-    grid-template-columns: 1fr;
+    gap: 1.35rem;
   }
 }
 
